@@ -1,0 +1,79 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2025-09-27T12:03:23.674382275Z",
+  "ArtifactName": "mytestimage:local",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 12320256,
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.18.12",
+      "EOSL": true
+    },
+    "ImageID": "sha256:e0650cb066662df82f10578d9f2792f454c3f242a63ee5de656bb8087bfa4619",
+    "DiffIDs": [
+      "sha256:f44f286046d9443b2aeb895c0e1f4e688698247427bca4d15112c8e3432a803e",
+      "sha256:43657049a47908eaf77d8d007dd0a99a339f7b2ae7d3c114eac2641aa3f8b714"
+    ],
+    "RepoTags": [
+      "mytestimage:local"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2025-09-27T12:02:45.30221125Z",
+      "history": [
+        {
+          "created": "2025-02-14T03:03:06Z",
+          "created_by": "ADD alpine-minirootfs-3.18.12-x86_64.tar.gz / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-02-14T03:03:06Z",
+          "created_by": "CMD [\"/bin/sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-09-27T12:02:45Z",
+          "created_by": "RUN /bin/sh -c apk add --no-cache curl # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:f44f286046d9443b2aeb895c0e1f4e688698247427bca4d15112c8e3432a803e",
+          "sha256:43657049a47908eaf77d8d007dd0a99a339f7b2ae7d3c114eac2641aa3f8b714"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "/bin/sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "WorkingDir": "/"
+      }
+    },
+    "Layers": [
+      {
+        "Size": 7649792,
+        "Digest": "sha256:44cf07d57ee4424189f012074a59110ee2065adfdde9c7d9826bebdffce0a885",
+        "DiffID": "sha256:f44f286046d9443b2aeb895c0e1f4e688698247427bca4d15112c8e3432a803e"
+      },
+      {
+        "Size": 4670464,
+        "DiffID": "sha256:43657049a47908eaf77d8d007dd0a99a339f7b2ae7d3c114eac2641aa3f8b714"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "mytestimage:local (alpine 3.18.12)",
+      "Class": "os-pkgs",
+      "Type": "alpine"
+    }
+  ]
+}
