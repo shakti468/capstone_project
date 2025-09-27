@@ -74,5 +74,55 @@ trivy image --format json --output scans/alpine_3.18.json alpine:3.18
 <img width="1466" height="397" alt="image" src="https://github.com/user-attachments/assets/3762563e-76e9-4797-b8aa-4557d72a62e8" />
 
 
+
 -----
+
+# Step 2 — CI/CD Integration with Vulnerability Scanning
+
+- Purpose
+Integrate the vulnerability scanner into a CI/CD pipeline so every new container image is automatically scanned. Builds fail if vulnerabilities exceed severity thresholds (HIGH or CRITICAL), preventing insecure images from being deployed.
+
+## Folder Structure Update
+```bash
+ci/
+ └─ github-actions/
+     └─ trivy-scan.yml
+```
+
+## GitHub Actions Workflow
+```bash
+name: Container Vulnerability Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:test .
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'myapp:test'
+          format: 'table'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+```
+
+## Running the Workflow
+<img width="1503" height="782" alt="image" src="https://github.com/user-attachments/assets/c5a34f32-c749-4c89-a139-75024116cc74" />
 
