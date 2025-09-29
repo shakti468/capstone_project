@@ -15,6 +15,7 @@ Automatically scan container images for known vulnerabilities before deployment.
 ---
 
 ## Repository Structure
+```bash
 capstone_project/
 ├─ README.md
 ├─ .gitignore
@@ -24,6 +25,7 @@ capstone_project/
 ├─ scans/
 ├─ samples/
 │ └─ sample-images.txt
+bash
 
 ---
 
