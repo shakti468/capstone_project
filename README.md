@@ -126,3 +126,59 @@ jobs:
 ## Running the Workflow
 <img width="1503" height="782" alt="image" src="https://github.com/user-attachments/assets/c5a34f32-c749-4c89-a139-75024116cc74" />
 
+-----
+
+# Step 3 — Report Generation & Slack Notifications
+
+- In this step, we extend our vulnerability scanner to generate HTML reports from Trivy scan results and send Slack notifications so the DevOps team gets real-time updates.
+
+## Folder Structure Update
+```bash
+container-vuln-scanner/
+├─ scripts/
+│  ├─ generate_report.py    # Generates HTML report from JSON scans
+│  └─ notify_slack.py       # Sends report link to Slack channel
+├─ scans/                   # Trivy JSON scan results
+├─ reports/                 # Generated HTML reports
+```
+
+## Open Slack Workspace
+-	Go to https://slack.com and log in.
+
+## Choose a Channel
+-	Pick the channel where you want to receive vulnerability reports.
+
+## Invite Your Bot to the Channel
+
+Inside the channel, at the bottom chat box (where you normally type messages):
+1.	Type the following command (replace YourBotName with the bot name you set when creating it in Slack API):
+2.	/invite @YourBotName
+
+### Screenshots:
+<img width="1560" height="903" alt="image" src="https://github.com/user-attachments/assets/1266ae46-715a-4539-8661-d7bdd2c15cfb" />
+
+
+## Setup before running
+## Export environment variables 
+```bash
+ export SLACK_BOT_TOKEN="xoxb-your-token"
+	export SLACK_CHANNEL="C05XXXXXXX"   # Replace with your Slack channel ID
+```
+
+### Screenshots
+<img width="1468" height="75" alt="image" src="https://github.com/user-attachments/assets/f24277a8-f525-4a86-9bdf-c50a71632376" />
+
+## 	Run your report generator and the notifier:
+<img width="1453" height="142" alt="image" src="https://github.com/user-attachments/assets/8c7d27b8-c51d-4c53-b64c-31b342898ad9" />
+
+## 📌 Example Slack Message
+
+- In your channel (e.g., #it_vulnerability_reports) you will see:
+
+### Screenshot
+<img width="932" height="358" alt="image" src="https://github.com/user-attachments/assets/0f192c5c-6689-463d-bcd4-c12c15ef6f18" />
+
+---------
+
+
+  
