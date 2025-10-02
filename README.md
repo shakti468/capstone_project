@@ -183,4 +183,127 @@ Inside the channel, at the bottom chat box (where you normally type messages):
 ---------
 
 
+
+# 📊 Step 4 — Web Dashboard with Grafana + Prometheus
+- In this step, we build a dashboard to visualize vulnerability trends over time.
+Each Trivy scan summary is exported as metrics → collected by Prometheus → visualized in Grafana.
+
+## Folder Structure
+```bash
+container-vuln-scanner/
+├─ scripts/
+│  └─ export_metrics.py      # Prometheus metrics exporter
+├─ scans/                    # JSON scan outputs from Trivy
+├─ reports/                  # HTML reports (Step 3)
+├─ dashboard/
+│  ├─ docker-compose.yml     # Runs Prometheus + Grafana
+│  ├─ prometheus.yml         # Prometheus config
+│  └─ grafana-provisioning/  # (optional auto-setup)
+│     ├─ datasources/
+│     │   └─ datasource.yml
+│     └─ dashboards/
+│         └─ vuln-dashboard.json
+
+```
+## Run Prometheus + Grafana
+```bash
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+```
+
+## Run:
+```bash
+cd dashboard
+docker-compose up -d
+```
+### Prometheus → http://localhost:9090
+<img width="966" height="708" alt="image" src="https://github.com/user-attachments/assets/ac40e257-77b8-464e-883f-83e73415f000" />
+
+### Grafana → http://localhost:3000
+<img width="1133" height="762" alt="image" src="https://github.com/user-attachments/assets/ef34df00-726e-493d-982e-edde0798248f" />
+
+## Configure Prometheus
+```bash
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'vuln_scanner'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+```
+
+## Export Metrics from Scans
+```bash
+import json
+import os
+from prometheus_client import start_http_server, Gauge
+import time
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCANS_DIR = os.path.join(BASE_DIR, "scans")
+
+# Prometheus metrics
+critical_gauge = Gauge("vuln_critical", "Number of CRITICAL vulnerabilities")
+high_gauge = Gauge("vuln_high", "Number of HIGH vulnerabilities")
+medium_gauge = Gauge("vuln_medium", "Number of MEDIUM vulnerabilities")
+low_gauge = Gauge("vuln_low", "Number of LOW vulnerabilities")
+
+def count_vulns():
+    counts = {"CRITICAL":0, "HIGH":0, "MEDIUM":0, "LOW":0}
+    for file in os.listdir(SCANS_DIR):
+        if file.endswith(".json"):
+            with open(os.path.join(SCANS_DIR, file)) as f:
+                data = json.load(f)
+                for result in data.get("Results", []):
+                    for vuln in result.get("Vulnerabilities", []):
+                        sev = vuln.get("Severity")
+                        if sev in counts:
+                            counts[sev] += 1
+    return counts
+
+if __name__ == "__main__":
+    start_http_server(9100)
+    print("✅ Exporter running at :9100/metrics")
+    while True:
+        c = count_vulns()
+        critical_gauge.set(c["CRITICAL"])
+        high_gauge.set(c["HIGH"])
+        medium_gauge.set(c["MEDIUM"])
+        low_gauge.set(c["LOW"])
+        time.sleep(30)
+```
+
+## Install dependencies:
+```bash
+pip install prometheus-client
+```
+## Run:
+```bash
+python3 scripts/export_metrics.py
+```
+## Check → http://localhost:9100/metrics
+<img width="932" height="982" alt="image" src="https://github.com/user-attachments/assets/44a4b284-ce97-4060-af6d-0a31111393c3" />
+
+
+------
+
+
   
