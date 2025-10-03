@@ -305,5 +305,149 @@ python3 scripts/export_metrics.py
 
 ------
 
+# Step 5 — Advanced Scanner Customization & Exception Handling
 
-  
+## Folder Structure Update
+```bash
+container-vuln-scanner/
+├─ scripts/
+│  ├─ scan_with_exceptions.py   # Advanced scanner
+│  ├─ rescan_scheduler.sh       # Cron-based rescanning
+│  └─ retry_wrapper.sh          # Retry logic for CI/CD
+├─ config/
+│  └─ exceptions.json  
+  ```
+
+## Exception Handling (Ignore Certain CVEs)
+## Create config/exceptions.json:
+```bash
+{
+  "ignore_cves": [
+    "CVE-2023-12345",
+    "CVE-2022-99999"
+  ]
+}
+```
+
+## Create scripts/scan_with_exceptions.py:
+```bash
+import json
+import os
+import subprocess
+import sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCANS_DIR = os.path.join(BASE_DIR, "scans")
+CONFIG_FILE = os.path.join(BASE_DIR, "config", "exceptions.json")
+
+os.makedirs(SCANS_DIR, exist_ok=True)
+
+def load_exceptions():
+    if not os.path.exists(CONFIG_FILE):
+        return []
+    with open(CONFIG_FILE) as f:
+        return json.load(f).get("ignore_cves", [])
+
+def run_trivy(image, outfile):
+    cmd = [
+        "trivy", "image", "--quiet",
+        "--format", "json",
+        "--output", outfile,
+        image
+    ]
+    subprocess.run(cmd, check=True)
+
+def filter_vulns(scan_file, exceptions):
+    with open(scan_file) as f:
+        data = json.load(f)
+
+    for result in data.get("Results", []):
+        if "Vulnerabilities" in result:
+            result["Vulnerabilities"] = [
+                v for v in result["Vulnerabilities"]
+                if v.get("VulnerabilityID") not in exceptions
+            ]
+
+    with open(scan_file, "w") as f:
+        json.dump(data, f, indent=2)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 scan_with_exceptions.py <image>")
+        sys.exit(1)
+
+    image = sys.argv[1]
+    outfile = os.path.join(SCANS_DIR, f"{image.replace('/', '_').replace(':', '_')}.json")
+
+    exceptions = load_exceptions()
+    print(f"🔎 Scanning {image} (ignoring {len(exceptions)} CVEs)")
+
+    run_trivy(image, outfile)
+    filter_vulns(outfile, exceptions)
+
+    print(f"✅ Scan complete. Filtered report saved to {outfile}")
+```
+
+## Run:
+```bash
+python3 scripts/scan_with_exceptions.py alpine:3.18
+
+```
+
+## Rescan Scheduling
+## Create scripts/rescan_scheduler.sh:
+```bash
+#!/bin/bash
+# Rescan all images every 24h (or on demand)
+
+IMAGES_FILE="samples/sample-images.txt"
+LOGFILE="logs/rescan.log"
+mkdir -p logs
+
+while read -r img; do
+  echo "Rescanning $img..."
+  python3 scripts/scan_with_exceptions.py "$img" >> "$LOGFILE" 2>&1
+done < "$IMAGES_FILE"
+
+echo "✅ Rescan complete. Reports in scans/, log in $LOGFILE"
+```
+
+## Make executable:
+```bash
+chmod +x scripts/rescan_scheduler.sh
+```
+## Add to cron for daily rescans:
+```bash
+crontab -e
+# Run daily at midnight
+0 0 * * * /path/to/container-vuln-scanner/scripts/rescan_scheduler.sh
+```
+
+## Retry Wrapper for CI/CD
+## scripts/retry_wrapper.sh:
+```bash
+#!/bin/bash
+# Usage: ./retry_wrapper.sh "<command>"
+
+CMD=$1
+MAX_RETRIES=3
+COUNT=0
+
+until [ $COUNT -ge $MAX_RETRIES ]
+do
+   echo "Attempt $((COUNT+1))..."
+   eval "$CMD" && break
+   COUNT=$((COUNT+1))
+   sleep 5
+done
+
+if [ $COUNT -eq $MAX_RETRIES ]; then
+   echo "❌ Command failed after $MAX_RETRIES retries."
+   exit 1
+fi
+```
+
+
+
+
+
