@@ -394,6 +394,11 @@ python3 scripts/scan_with_exceptions.py alpine:3.18
 
 ```
 
+### Screenshots
+<img width="1357" height="76" alt="image" src="https://github.com/user-attachments/assets/09745742-d029-42c5-b3d7-8790296736f3" />
+
+
+--------
 ## Rescan Scheduling
 ## Create scripts/rescan_scheduler.sh:
 ```bash
@@ -447,6 +452,16 @@ if [ $COUNT -eq $MAX_RETRIES ]; then
 fi
 ```
 
+## run:
+```bash
+./scripts/retry_wrapper.sh "python3 scripts/scan_with_exceptions.py mytestimage:local"
+```
+
+### Screenshots
+
+<img width="1448" height="127" alt="image" src="https://github.com/user-attachments/assets/dd4b615e-7f5a-415b-a959-2fc7598ddd17" />
+
+----------------
 
 
 
