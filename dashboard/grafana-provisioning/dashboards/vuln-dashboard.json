@@ -1,0 +1,18 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Container Vulnerability Dashboard",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Vulnerabilities Over Time",
+        "targets": [
+          {"expr": "vuln_critical", "legendFormat": "Critical"},
+          {"expr": "vuln_high", "legendFormat": "High"},
+          {"expr": "vuln_medium", "legendFormat": "Medium"},
+          {"expr": "vuln_low", "legendFormat": "Low"}
+        ]
+      }
+    ]
+  }
+}
